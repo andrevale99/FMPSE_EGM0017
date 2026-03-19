@@ -3,9 +3,9 @@ import numpy as np
 from numpy import pi
 from scipy import signal
 
-
-Samples = 1000
-timeVect = np.linspace(0,2,Samples)
+timeMax = 3
+Samples = 1000 * timeMax
+timeVect = np.linspace(0,timeMax,Samples)
 
 Ra = 2.5 #Ohm
 La = 0.05 #H
@@ -25,11 +25,17 @@ B = np.array([[1/La],[0],[0]])
 
 # x = [ia, wa, theta]
 C = np.eye(3)
+C = C[1,:]
 
 D = 0
 
-sys = signal.StateSpace(A, B, C[1,:], D)
+u = np.zeros_like(timeVect)
+u[timeVect > 0.5] = 5
+u[timeVect > 1.0] = 0
+
+sys = signal.StateSpace(A, B, C, D)
 t, y = signal.step(sys, T=timeVect)
+# t,y,_ = signal.lsim(sys, U=u, T=timeVect)
 
 plt.plot(t,y)
 plt.grid()
