@@ -7,9 +7,9 @@ from scipy import signal
 Samples = 1000
 timeVect = np.linspace(0,2,Samples)
 
-Ra = 2.5
-La = 0.05
-J = 0.02
+Ra = 2.5 #Ohm
+La = 0.05 #H
+J = 0.02 
 B = 1.9e-3
 Ke = 0.31
 Kt = Ke
