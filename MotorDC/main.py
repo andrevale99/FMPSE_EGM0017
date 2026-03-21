@@ -96,6 +96,10 @@ Ke = 0.31
 Kt = Ke
 Kte = Kt
 
+# x = [ia, wa, theta]
+# ia -> Corrente de armadura
+# wm -> Velocidade (rad/s) do rotor
+# theta -> Posicao (rad) do rotor
 A = np.array([
     [-Ra/La, -Kte/La, 0],
     [Kte/J, -B/J, 0],
@@ -104,10 +108,6 @@ A = np.array([
 
 B = np.array([[1/La],[0],[0]])
 
-# x = [ia, wa, theta]
-# ia -> Corrente de armadura
-# wm -> Velocidade (rad/s) do rotor
-# theta -> Posicao (rad) do rotor
 C = np.array([[0,0,1]])
 
 D = 0
