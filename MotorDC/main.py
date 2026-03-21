@@ -6,7 +6,6 @@ import control as ct
 
 from numpy import pi
 
-
 # ========================
 # FUNCOES
 # ========================= 
@@ -50,10 +49,40 @@ u[timeVect >= timeMax/2] = 180 #16.7 (mais ou menos o ganho real)
 # u[timeVect>timeMax/2] = timeMax/2
 
 # ================================
-# Polos desejados
+# Parametros de Projeto
 # =================================
 
-polos = np.array([-5+30j, -5-30j, -20, -20])
+'''
+Requisitos de projeto:
+
+1. +10% mais rápido;
+2. 5% de overshoot;
+3. Erro nulo em regime permanente;
+4. Simulação;
+5. Discretização (passo de integração, método numérico 
+6. Valor máximo de tensão aplicado no motor: 2,5 V
+'''
+
+Mp = 5 / 100
+ts2 = 0.9
+zeta = np.sqrt((np.log(Mp)**2) / (np.pi**2 + np.log(Mp)**2))
+wm = 4 / (ts2*zeta)
+
+print()
+print(f'Mp = {Mp}')
+print(f'ts (2%) = {ts2}')
+print(f'Zeta = {zeta}')
+print(f'wm (rad/2) = {wm}')
+print()
+
+real = zeta*wm
+imag = wm*np.sqrt(1-zeta**2)
+
+polos = np.array([-real+imag*1j, -real-imag*1j, -10, -12])
+
+print()
+print(f'polos = {polos}')
+print()
 
 # ================================
 # Modelagem por Espaco de Estados
@@ -83,6 +112,10 @@ C = np.array([[0,0,1]])
 
 D = 0
 
+print()
+print(f'Autovalores de A:\n{np.linalg.eigvals(A)}')
+print()
+
 # ==========================
 #  Funcao de transferencia do sistema
 # ==========================
@@ -104,7 +137,7 @@ t,y,_ = signal.lsim(sys, U=u, T=timeVect)
 # plotTheta(timeVect,u,y)
 
 # ===============================
-#  Realimentacao de estados
+#  Novo Sistema
 # ===============================
 
 # Matriz de Controlabilidade
@@ -112,15 +145,12 @@ U = np.concatenate((B, A @ B, np.linalg.matrix_power(A,2)@B), axis=1)
 rank_U = np.linalg.matrix_rank(U)
 print()
 print("\nMatriz de Controlabilidade U:\n", U)
+print()
 print("Posto da Matriz de Controlabilidade:", rank_U)
 print()
 
-# u = -kx
-# dx/dt = (A-BK)x + Bu
-print()
-print(f'Polos = {polos}')
-
 # Expandindo as matrizes para incluir o integrador
+# e o estado erro
 Ahat = np.concatenate((A, np.zeros((A.shape[0],1))), axis=1)
 temp = np.concatenate((-C, np.array([[0]])), axis=1)
 Ahat = np.concatenate((Ahat, temp), axis=0)
@@ -128,15 +158,17 @@ Bhat = np.concatenate((B, np.array([[0]])), axis=0)
 
 del temp
 
+# Ganho de realimentatacao e de integracao
 K = ct.acker(Ahat, Bhat, polos)
 KI = K[len(K)-1]
 K = np.copy(K[0:len(K)-1]).reshape(1,A.shape[0])
 print()
-print("Ganho de realimentação de estado K:\n", K)
-print("Ganho de realimentação de estado KI:\n", KI)
+print("K:\n", K)
+print("KI:\n", KI)
 print()
 
-# Aplicando no sistema realimentado
+# Sistema aumentado acrecentado do 
+# estado erro e ganho dos estados
 A00 = A - (B * K)
 A01 = B * -KI
 A10 = -C
@@ -157,7 +189,7 @@ Cf = np.concatenate((C, np.array([[0]])), axis=1)
 Df = np.array([[0]])
 
 # ==========================
-#  Funcao de transferencia do sistema
+#  Funcao de transferencia do sistema aumentado
 # ==========================
 
 num, den = signal.ss2tf(Af, Bf, Cf, Df, input=0)
@@ -169,7 +201,7 @@ print()
 
 
 # ==========================
-# Resposta coma realimentação e eintegrador
+# Resposta coma realimentação e integrador
 # ==========================
 
 sys = signal.StateSpace(Af, Bf, Cf, Df)
