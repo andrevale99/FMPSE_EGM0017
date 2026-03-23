@@ -23,8 +23,8 @@ def plotTheta(timeVect,u,y):
 # ==========================
 # DADOS COLETADOS
 # ==========================
-file1 = "MotorDC/csv/rpm_data_20260320_123617.csv"
-file2 = "MotorDC/csv/rpm_data_20260320_123711.csv"
+file1 = "csv/rpm_data_20260320_123617.csv"
+file2 = "csv/rpm_data_20260320_123711.csv"
 
 data = pd.read_csv(file2)
 
@@ -63,8 +63,8 @@ Requisitos de projeto:
 6. Valor máximo de tensão aplicado no motor: 2,5 V
 '''
 
-Mp = 5 / 100
-ts2 = 0.9
+Mp = 10 / 100
+ts2 = 0.5
 zeta = np.sqrt((np.log(Mp)**2) / (np.pi**2 + np.log(Mp)**2))
 wm = 4 / (ts2*zeta)
 
@@ -78,7 +78,7 @@ print()
 real = zeta*wm
 imag = wm*np.sqrt(1-zeta**2)
 
-polos = np.array([-real+imag*1j, -real-imag*1j, -10, -12])
+polos = np.array([-real+imag*1j, -real-imag*1j, -real*4, -real*4])
 
 print()
 print(f'polos = {polos}')
