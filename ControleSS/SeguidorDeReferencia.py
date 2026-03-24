@@ -63,8 +63,8 @@ Requisitos de projeto:
 6. Valor máximo de tensão aplicado no motor: 2,5 V
 '''
 
-Mp = 10 / 100
-ts2 = 0.5
+Mp = 5 / 100
+ts2 = 0.6
 zeta = np.sqrt((np.log(Mp)**2) / (np.pi**2 + np.log(Mp)**2))
 wm = 4 / (ts2*zeta)
 
@@ -72,7 +72,7 @@ print()
 print(f'Mp = {Mp}')
 print(f'ts (2%) = {ts2}')
 print(f'Zeta = {zeta}')
-print(f'wm (rad/2) = {wm}')
+print(f'wm (rad/s) = {wm}')
 print()
 
 real = zeta*wm
@@ -134,7 +134,7 @@ print()
 sys = signal.StateSpace(A, B, C, D)
 t,y,_ = signal.lsim(sys, U=u, T=timeVect)
 
-# plotTheta(timeVect,u,y)
+plotTheta(timeVect,u,y)
 
 # ===============================
 #  Novo Sistema
