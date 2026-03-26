@@ -59,7 +59,7 @@ Requisitos de projeto:
 2. 5% de overshoot;
 3. Erro nulo em regime permanente;
 4. Simulação;
-5. Discretização (passo de integração, método numérico 
+5. Discretização (passo de integração, método numérico)
 6. Valor máximo de tensão aplicado no motor: 2,5 V
 '''
 
