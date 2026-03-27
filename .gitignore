@@ -1,7 +1,6 @@
-bin/
-include/
-lib/
-lib64/
-lib64
+ControleSS/bin
+ControleSS/include
+ControleSS/lib
+ControleSS/share
+ControleSS/lib64
 *.cfg
-share/
