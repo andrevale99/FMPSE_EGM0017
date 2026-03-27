@@ -5,32 +5,36 @@
 #include <stddef.h>
 #include <stm32f411xe.h>
 
+#define RET_OK 0
+#define RET_INVALID_ARG -1
+#define RET_NO_GPIO -2
+
 #define DRV8833_NUM_CHANNELS 4
-
-#define DRV8833_RET_OK 0
-#define DRV8833_RET_INVALID_ARG -1
-#define DRV8833_RET_NO_GPIO -2
-
-#define DRV8833_DISCONNECT_GPIO -1
 
 typedef int drv8833_err;
 
 typedef struct
 {
-    GPIO_TypeDef *gpioReg;
-    int32_t AlternateFuncSel;
-    int32_t OutputMode;
-    int32_t in;
+    void (*config_gpio)(void);
+    void (*set_state)(uint8_t level);
 } drv8833_gpio_config_t;
 
 typedef struct
 {
-    drv8833_gpio_config_t IN[DRV8833_NUM_CHANNELS];
-    drv8833_gpio_config_t SLEEP;
-} drv8833_config_t;
+    void (*config_pwm)(void);
+    uint32_t maxDuty;
+}drv8833_pwm_config_t;
 
-drv8833_err drv8833_init(drv8833_config_t *config);
 
-void drv8833_set_sleep_state(drv8833_config_t *config, uint8_t state);
+typedef struct
+{
+    drv8833_gpio_config_t in[DRV8833_NUM_CHANNELS];
+    drv8833_gpio_config_t sleep;
+    drv8833_pwm_config_t pwmConfig;
+} drv8833_handle_t;
+
+drv8833_err drv8833_init(drv8833_handle_t *config);
+
+drv8833_err drv8833_set_sleep(void);
 
 #endif
