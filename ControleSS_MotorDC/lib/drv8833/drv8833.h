@@ -22,7 +22,6 @@ typedef struct
 typedef struct
 {
     void (*config_pwm)(void);
-    uint32_t maxDuty;
 }drv8833_pwm_config_t;
 
 
@@ -34,7 +33,5 @@ typedef struct
 } drv8833_handle_t;
 
 drv8833_err drv8833_init(drv8833_handle_t *config);
-
-drv8833_err drv8833_set_sleep(void);
 
 #endif
