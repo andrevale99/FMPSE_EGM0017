@@ -69,11 +69,11 @@ void gpio_set_state_sleep(uint8_t state)
 void pwm_init(void)
 {
     /* 3. Configura o Timer */
-    TIM1->PSC = 8399; // Prescaler
+    TIM1->PSC = 15; // Prescaler
     TIM1->ARR = 999;  // Auto-reload
 
     /* Duty cycle inicial (50%) */
-    TIM1->CCR1 = 500;
+    TIM1->CCR1 = 100;
 
     /* 4. PWM mode 1 no canal 1 */
     TIM1->CCMR1 &= ~(TIM_CCMR1_OC1M);
@@ -95,6 +95,11 @@ void pwm_init(void)
 
     /* 9. Inicia o timer */
     TIM1->CR1 |= TIM_CR1_CEN;
+}
+
+void pwm_set_duty(uint32_t duty)
+{
+    TIM1->CCR1 = duty;
 }
 
 #endif

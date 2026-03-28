@@ -16,14 +16,27 @@ drv8833_err drv8833_init(drv8833_handle_t *config)
     }
 
     if ((config->sleep.config_gpio) &&
-            (config->sleep.set_state))
+        (config->sleep.set_state))
     {
         config->sleep.config_gpio();
         config->sleep.set_state(0);
     }
 
-    if(config->pwmConfig.config_pwm)
-        config->pwmConfig.config_pwm();
+    if (config->pwm.config_pwm)
+        config->pwm.config_pwm();
+
+    return RET_OK;
+}
+
+drv8833_err drv8833_set_duty_cycle(drv8833_handle_t *config, uint32_t duty)
+{
+    if (!(config->pwm.config_pwm))
+        return RET_INVALID_ARG;
+
+    if (duty > config->pwm.maxDuty)
+        config->pwm.set_duty_cycle(config->pwm.maxDuty);
+
+    config->pwm.set_duty_cycle(duty);
 
     return RET_OK;
 }

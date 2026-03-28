@@ -22,9 +22,13 @@ int main(void)
     drv8833.sleep.config_gpio = gpio_drv8833_setup_sleep;
     drv8833.sleep.set_state = gpio_set_state_sleep;
 
-    drv8833.pwmConfig.config_pwm = pwm_init;
+    drv8833.pwm.config_pwm = pwm_init;
+    drv8833.pwm.set_duty_cycle = pwm_set_duty;
+    drv8833.pwm.maxDuty = 999;
 
     drv8833_init(&drv8833);
+
+    drv8833_set_duty_cycle(&drv8833,10);
 
     drv8833.sleep.set_state(1);
     

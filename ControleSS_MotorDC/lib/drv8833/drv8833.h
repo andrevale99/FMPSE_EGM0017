@@ -22,6 +22,8 @@ typedef struct
 typedef struct
 {
     void (*config_pwm)(void);
+    void (*set_duty_cycle)(uint32_t duty);
+    uint32_t maxDuty;
 }drv8833_pwm_config_t;
 
 
@@ -29,9 +31,11 @@ typedef struct
 {
     drv8833_gpio_config_t in[DRV8833_NUM_CHANNELS];
     drv8833_gpio_config_t sleep;
-    drv8833_pwm_config_t pwmConfig;
+    drv8833_pwm_config_t pwm;
 } drv8833_handle_t;
 
 drv8833_err drv8833_init(drv8833_handle_t *config);
+
+drv8833_err drv8833_set_duty_cycle(drv8833_handle_t *config, uint32_t duty);
 
 #endif
