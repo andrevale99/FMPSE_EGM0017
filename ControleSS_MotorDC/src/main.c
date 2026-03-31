@@ -25,6 +25,7 @@ int main(void)
     };
 
     rcc_enable_clocks();
+    systick_init();
 
     motor_dc_handle_t motor = {
         .m1 =
@@ -52,8 +53,19 @@ int main(void)
 
     drv8833_set_sleep_state(&sleepGPIO, 1);
 
+    lcd16x2_init4bits();
+
     while (1)
     {
+        lcd16x2_cmd('A', WRITE);
+        lcd16x2_cmd('N', WRITE);
+        lcd16x2_cmd('D', WRITE);
+        lcd16x2_cmd('R', WRITE);
+        lcd16x2_cmd('E', WRITE);
+        delay_ms(1000);
+        lcd16x2_cmd(CLEAR_DISPLAY, CMD);
+        lcd16x2_cmd(RETURN_HOME, CMD);
+        delay_ms(500);
     }
 
     return 0;
