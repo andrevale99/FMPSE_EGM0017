@@ -170,7 +170,7 @@ void lcd16x2_pulse_enable(void)
 {
     delay_ms(1);
     GPIOB->BSRR |= (1 << 12); // EN = 1
-    delay_ms(10);
+    delay_ms(1);
     GPIOB->BSRR |= (1 << 28); // EN = 0
     delay_ms(1);
 }
