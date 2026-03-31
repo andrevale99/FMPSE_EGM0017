@@ -2,10 +2,12 @@
 
 #include <stm32f411xe.h>
 
-#include "inits.h"
+#include "systick.h"
+#include "inits_perifericos.h"
 
 #include "drv8833.h"
 #include "motor_dc.h"
+#include "lcd16x2.h"
 
 void TIM3_IRQHandler(void)
 {
