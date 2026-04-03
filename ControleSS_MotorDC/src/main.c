@@ -16,56 +16,28 @@ void TIM3_IRQHandler(void)
 
 int main(void)
 {
-    drv8833_handle_t drv8833;
-    memset(&drv8833, 0, sizeof(drv8833));
-
-    drv8833_sleep_t sleepGPIO = {
-        .config_gpio = gpio_drv8833_setup_sleep,
-        .set_state = gpio_set_state_sleep,
-    };
-
     rcc_enable_clocks();
     systick_init();
+    gpio_lcd16x2_setup();
 
-    motor_dc_handle_t motor = {
-        .m1 =
-            {
-                .in.config_gpio = gpio_drv8833_setup_in1,
-                .in.set_state = gpio_set_state_in1,
+    lcd16x2_handle lcd = {
+        .d4.write = write_d4,
+        .d5.write = write_d5,
+        .d6.write = write_d6,
+        .d7.write = write_d7,
 
-                .pwm.config_pwm = pwm_init,
-                .pwm.set_duty_cycle = tim1_channel1_pwm_set_duty,
-                .pwm.maxDuty = 999,
-            },
+        .en.write = write_en,
+        .rs.write = write_rs,
 
-        .m2 = {
-            .in.config_gpio = gpio_drv8833_setup_in2,
-            .in.set_state = gpio_set_state_in2,
-
-            .pwm.config_pwm = pwm_init,
-            .pwm.set_duty_cycle = tim1_channel2_pwm_set_duty,
-            .pwm.maxDuty = 999,
-        },
+        .delay_ms = delay_ms,
     };
 
-    motor_dc_init(&motor);
-    drv8833_sleep_init(&sleepGPIO);
-
-    drv8833_set_sleep_state(&sleepGPIO, 1);
-
-    lcd16x2_init4bits();
+    lcd16x2_init_4bits(&lcd);
+    lcd16x2_send_data(&lcd, 'A');
 
     while (1)
     {
-        lcd16x2_cmd('A', WRITE);
-        lcd16x2_cmd('N', WRITE);
-        lcd16x2_cmd('D', WRITE);
-        lcd16x2_cmd('R', WRITE);
-        lcd16x2_cmd('E', WRITE);
-        delay_ms(1000);
-        lcd16x2_cmd(CLEAR_DISPLAY, CMD);
-        lcd16x2_cmd(RETURN_HOME, CMD);
-        delay_ms(500);
+
     }
 
     return 0;

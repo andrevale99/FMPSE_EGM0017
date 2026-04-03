@@ -43,8 +43,7 @@ typedef int8_t lcd16x2_err;
 
 typedef struct
 {
-    GPIO_TypeDef *gpio_d4;
-    uint8_t pin;
+    void (*write)(uint8_t);
 } lcd16x2_pin_t;
 
 typedef struct
@@ -60,10 +59,12 @@ typedef struct
     void (*delay_ms)(uint32_t);
 } lcd16x2_handle;
 
-lcd16x2_err lcd16x2_init_4bits(lcd16x2_handle *handle);
+lcd16x2_err lcd16x2_init_4bits(const lcd16x2_handle *handle);
 
-lcd16x2_err lcd16x2_send_cmd(lcd16x2_handle *handle, uint8_t cmd);
+lcd16x2_err lcd16x2_send_cmd(const lcd16x2_handle *handle, uint8_t cmd);
 
-lcd16x2_err lcd16x2_send_data(lcd16x2_handle *handle, uint8_t data);
+lcd16x2_err lcd16x2_send_data(const lcd16x2_handle *handle, uint8_t data);
+
+void pulse_enable(const lcd16x2_handle *handle);
 
 #endif

@@ -2,6 +2,7 @@
 #define INITS_H
 
 #include <stm32f411xe.h>
+#include "lcd16x2.h"
 
 void rcc_enable_clocks(void)
 {
@@ -9,6 +10,10 @@ void rcc_enable_clocks(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
 }
+
+// =================================
+// SETUP PARA O DRV8833
+// =================================
 
 void gpio_drv8833_setup_in1(void)
 {
@@ -132,38 +137,11 @@ void TIMER3_Setup(void)
     NVIC_SetPriority(TIM3_IRQn, 0);
 }
 
-void lcd16x2_pulse_enable(void)
-{
-    delay_ms(1);
-    GPIOB->BSRR |= (1 << 12); // EN = 1
-    delay_ms(1);
-    GPIOB->BSRR |= (1 << 28); // EN = 0
-    delay_ms(1);
-}
+// =================================
+// SETUP PARA O LCD16x2
+// =================================
 
-void lcd16x2_cmd(uint8_t cmd, uint8_t rs_state)
-{
-    GPIOA->BSRR = (0xF << 16);
-    GPIOA->BSRR = ((cmd >> 4) & 0xF); /* sending upper nibble */
-
-    if (rs_state == 0) // command ?
-        GPIOB->BSRR = (1 << 29); /* RS=0, command reg. */
-    else // write ?
-        GPIOB->BSRR = (1 << 13); /* RS=1, command reg. */
-
-    lcd16x2_pulse_enable();
-
-    GPIOA->BSRR = (0xF << 16);
-    GPIOA->BSRR |= (cmd & 0xF); /* sending lower nibble */
-    lcd16x2_pulse_enable();
-
-    if (rs_state == 1) // write ?
-        GPIOB->BSRR |= (1 << 29); /* RS=0, command reg. */
-
-    delay_ms(50);
-}
-
-void lcd16x2_init4bits(void)
+void gpio_lcd16x2_setup(void)
 {
     // Pinos A0,A1,A2 e A3 como output
     GPIOA->MODER |= (0x55);
@@ -171,22 +149,55 @@ void lcd16x2_init4bits(void)
 
     // Pinos B12 (EN) e B13 (RS)
     GPIOB->MODER |= (0x5 << 24);
-    GPIOA->OSPEEDR |= (0xA << 24);
+    GPIOB->OSPEEDR |= (0xA << 24);
+}
 
-    delay_ms(100);
+void write_d4(uint8_t state)
+{
+    if (state)
+        GPIOA->BSRR |= (1 << 0);
+    else
+        GPIOA->BSRR |= (1 << (0 + 16));
+}
 
-    lcd16x2_pulse_enable();
-    delay_ms(10);
-    lcd16x2_pulse_enable();
-    delay_ms(10);
+void write_d5(uint8_t state)
+{
+    if (state)
+        GPIOA->BSRR |= (1 << 1);
+    else
+        GPIOA->BSRR |= (1 << (1 + 16));
+}
 
-    lcd16x2_cmd(BITS_4 | LINES_2, CMD);                      // interface de 4 bits 2 linhas (aqui se habilita as 2 linhas)
-                                                             // são enviados os 2 nibbles (0x2 e 0x8)
-    lcd16x2_cmd(DISPLAY_ON | CURSOR_ON | BLINK_CURSOR, CMD); // mensagem aparente cursor inativo não piscando
-    lcd16x2_cmd(SET_DDRAM | 0x00, CMD);                      // inicializa cursor na primeira posição a esquerda - 1a linha
+void write_d6(uint8_t state)
+{
+    if (state)
+        GPIOA->BSRR |= (1 << 2);
+    else
+        GPIOA->BSRR |= (1 << (2+16));
+}
 
-    lcd16x2_cmd(CLEAR_DISPLAY, CMD);                         // limpa todo o display
-    lcd16x2_cmd(RETURN_HOME, CMD);
+void write_d7( uint8_t state)
+{
+    if (state)
+        GPIOA->BSRR |= (1 << 3);
+    else
+        GPIOA->BSRR |= (1 << (3 + 16));
+}
+
+void write_en(uint8_t state)
+{
+    if (state)
+        GPIOB->BSRR |= (1 << 12); // EN = 1
+    else
+        GPIOB->BSRR |= (1 << 28); // EN = 0
+}
+
+void write_rs(uint8_t state)
+{
+    if (state)
+        GPIOB->BSRR |= (1 << 13);
+    else
+        GPIOB->BSRR |= (1 << 29);
 }
 
 #endif
