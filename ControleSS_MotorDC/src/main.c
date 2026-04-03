@@ -9,13 +9,13 @@
 #include "motor_dc.h"
 #include "lcd16x2.h"
 
-volatile uint32_t cnt = 0;
+volatile int32_t cnt = 0;
 
 void TIM4_IRQHandler(void)
 {
     if (TIM4->SR & TIM_SR_UIF)
     {
-        cnt = TIM3->CNT;
+        cnt = (int16_t)TIM3->CNT;
         TIM3->CNT = 0;
         TIM4->SR &= ~TIM_SR_UIF;
         // Estouro aproximadamente em 49ms
@@ -26,6 +26,18 @@ void TIM4_IRQHandler(void)
 int main(void)
 {
     setup_system();
+
+    motor_dc_handle_t motor = {
+        .m1.in[0].set_state = gpio_drv8833_set_state_in1,
+        .m1.pwm.set_duty_cycle = tim1_channel1_pwm_set_duty,
+        .m1.pwm.maxDuty = 999,
+        .m1.sleep = gpio_dr8833_set_state_sleep,
+
+        .m2.in[1].set_state = gpio_drv8833_set_state_in2,
+        .m2.pwm.set_duty_cycle = tim1_channel2_pwm_set_duty,
+        .m2.pwm.maxDuty = 999,
+        .m2.sleep = gpio_dr8833_set_state_sleep,
+    };
 
     lcd16x2_handle lcd = {
         .d4.write = write_d4,
@@ -41,10 +53,12 @@ int main(void)
 
     lcd16x2_init_4bits(&lcd);
 
+    motor_dc_pwm_channel(&motor, 0, 999);
+
     char buffer[8] = {0};
     while (1)
     {
-        snprintf(buffer, 8, "%d\0", cnt);
+        snprintf(buffer, 8, "%li", cnt);
 
         for (char *i = buffer; *i != '\0'; i++)
             lcd16x2_send_data(&lcd, *i);
