@@ -13,10 +13,14 @@ volatile uint32_t cnt = 0;
 
 void TIM4_IRQHandler(void)
 {
-    cnt++;
-    TIM4->SR &= ~TIM_SR_UIF;
-    // Estouro aproximadamente em 49ms
-    // Limpar bit de evento
+    if (TIM4->SR & TIM_SR_UIF)
+    {
+        cnt = TIM3->CNT;
+        TIM3->CNT = 0;
+        TIM4->SR &= ~TIM_SR_UIF;
+        // Estouro aproximadamente em 49ms
+        // Limpar bit de evento
+    }
 }
 
 int main(void)
@@ -48,7 +52,6 @@ int main(void)
         delay_ms(1000);
         lcd16x2_send_cmd(&lcd, RETURN_HOME);
         lcd16x2_send_cmd(&lcd, CLEAR_DISPLAY);
-
     }
 
     return 0;
