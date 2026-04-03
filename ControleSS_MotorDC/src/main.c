@@ -1,4 +1,4 @@
-#include <memory.h>
+#include <stdio.h>
 
 #include <stm32f411xe.h>
 
@@ -9,17 +9,19 @@
 #include "motor_dc.h"
 #include "lcd16x2.h"
 
+volatile uint32_t cnt = 0;
+
 void TIM3_IRQHandler(void)
 {
-    // Estouro a cada 48ms
+    cnt++;
+    TIM3->SR &= ~TIM_SR_UIF;
+    // Estouro aproximadamente em 49ms
     // Limpar bit de evento
 }
 
 int main(void)
 {
-    rcc_enable_clocks();
-    systick_init();
-    gpio_lcd16x2_setup();
+    setup_system();
 
     lcd16x2_handle lcd = {
         .d4.write = write_d4,
@@ -34,21 +36,19 @@ int main(void)
     };
 
     lcd16x2_init_4bits(&lcd);
-    lcd16x2_send_data(&lcd, 'A');
 
-    char msg[7] = {"ANDRE\0"};
-
+    char buffer[8] = {0};
     while (1)
     {
-        for (char *i = msg; *i != '\0'; i++)
-        {
+        snprintf(buffer, 8, "%d\0", cnt);
+
+        for (char *i = buffer; *i != '\0'; i++)
             lcd16x2_send_data(&lcd, *i);
-            lcd.delay_ms(250);
-        }
-        lcd.delay_ms(1000);
+
+        delay_ms(1000);
         lcd16x2_send_cmd(&lcd, RETURN_HOME);
         lcd16x2_send_cmd(&lcd, CLEAR_DISPLAY);
-        lcd.delay_ms(1000);
+
     }
 
     return 0;
