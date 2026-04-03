@@ -113,7 +113,7 @@ void tim1_channel2_pwm_set_duty(uint32_t duty)
     TIM1->CCR2 = duty;
 }
 
-// ================================ 
+// ================================
 //  TIMER 3 SETUP (AMOSTRAGEM)
 // ================================
 
@@ -123,23 +123,25 @@ void TIMER3_Setup(void)
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 
     // Carrega o valor maximo da contagem
-    TIM3->ARR = 779;
+    TIM3->ARR = 780;
 
     // Ativa o prescale do contador
     TIM3->PSC = 1023;
 
-    // Ativa o evento somente pelo Contador
+    // Carregamento imediato de ARR
     TIM3->EGR |= TIM_EGR_UG;
 
     // Ativa a interrupcao
     TIM3->DIER |= TIM_DIER_UIE;
 
-    // Ativa a interrupcao somente pelo overflow/underflow ou DMA
-    // e ativa o contador
-    TIM3->CR1 |= TIM_CR1_URS | TIM_CR1_CEN;
+    TIM3->SR = 0;
 
     NVIC_EnableIRQ(TIM3_IRQn);
     NVIC_SetPriority(TIM3_IRQn, 0);
+
+    // Ativa a interrupcao somente pelo overflow/underflow ou DMA
+    // e ativa o contador
+    TIM3->CR1 |= TIM_CR1_URS | TIM_CR1_CEN;
 }
 
 // =================================
@@ -178,10 +180,10 @@ void write_d6(uint8_t state)
     if (state)
         GPIOA->BSRR |= (1 << 2);
     else
-        GPIOA->BSRR |= (1 << (2+16));
+        GPIOA->BSRR |= (1 << (2 + 16));
 }
 
-void write_d7( uint8_t state)
+void write_d7(uint8_t state)
 {
     if (state)
         GPIOA->BSRR |= (1 << 3);
@@ -218,8 +220,8 @@ void setup_system(void)
     gpio_drv8833_setup_in2();
     gpio_drv8833_setup_sleep();
 
-    // pwm_init();
-    // TIMER3_Setup();
+    pwm_init();
+    TIMER3_Setup();
 }
 
 #endif
