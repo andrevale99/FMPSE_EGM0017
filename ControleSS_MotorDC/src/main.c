@@ -12,6 +12,7 @@
 void TIM3_IRQHandler(void)
 {
     // Estouro a cada 48ms
+    // Limpar bit de evento
 }
 
 int main(void)
@@ -35,9 +36,19 @@ int main(void)
     lcd16x2_init_4bits(&lcd);
     lcd16x2_send_data(&lcd, 'A');
 
+    char msg[7] = {"ANDRE\0"};
+
     while (1)
     {
-
+        for (char *i = msg; *i != '\0'; i++)
+        {
+            lcd16x2_send_data(&lcd, *i);
+            lcd.delay_ms(250);
+        }
+        lcd.delay_ms(1000);
+        lcd16x2_send_cmd(&lcd, RETURN_HOME);
+        lcd16x2_send_cmd(&lcd, CLEAR_DISPLAY);
+        lcd.delay_ms(1000);
     }
 
     return 0;

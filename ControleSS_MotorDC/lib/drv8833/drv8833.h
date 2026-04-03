@@ -15,56 +15,24 @@ typedef int8_t drv8833_err;
 
 typedef struct
 {
-    void (*config_gpio)(void);
     void (*set_state)(uint8_t level);
-} drv8833_in_config_t;
+} drv8833_gpio_config_t;
 
 typedef struct
 {
-    void (*config_gpio)(void);
-    void (*set_state)(uint8_t level);
-} drv8833_sleep_t;
-
-typedef struct
-{
-    void (*config_pwm)(void);
     void (*set_duty_cycle)(uint32_t duty);
     uint32_t maxDuty;
 } drv8833_pwm_config_t;
 
 typedef struct
 {
-    drv8833_in_config_t in;
+    drv8833_gpio_config_t in[DRV8833_NUM_CHANNELS];
+    drv8833_gpio_config_t sleep;
     drv8833_pwm_config_t pwm;
 } drv8833_handle_t;
 
-/**
- * @brief Inicializa os pinos de entrada e PWM do driver DRV8833.
- *
- * Configura os GPIOs de controle (INx), define o estado inicial como baixo
- * e inicializa o PWM caso esteja configurado.
- *
- * @param[in,out] handle Ponteiro para a estrutura de controle do DRV8833.
- *
- * @return
- *      - RET_OK: Inicialização realizada com sucesso.
- *      - RET_INVALID_ARG: Ponteiro inválido ou funções não configuradas.
- */
-drv8833_err drv8833_in_init(drv8833_handle_t *handle);
 
-/**
- * @brief Inicializa o pino de controle de sleep do DRV8833.
- *
- * Configura o GPIO responsável pelo controle de sleep e define
- * o estado inicial como desabilitado.
- *
- * @param[in,out] sleep_t Ponteiro para a estrutura de controle do pino sleep.
- *
- * @return
- *      - RET_OK: Inicialização realizada com sucesso.
- *      - RET_INVALID_ARG: Ponteiro inválido ou funções não configuradas.
- */
-drv8833_err drv8833_sleep_init(drv8833_sleep_t *sleep_t);
+drv8833_err drv8833_set_in_level(drv8833_handle_t *drv8833, uint8_t channel, uint8_t state);
 
 /**
  * @brief Define o estado do pino sleep do DRV8833.
@@ -76,7 +44,7 @@ drv8833_err drv8833_sleep_init(drv8833_sleep_t *sleep_t);
  *      - RET_OK: Estado definido com sucesso.
  *      - RET_INVALID_ARG: Ponteiro inválido.
  */
-drv8833_err drv8833_set_sleep_state(drv8833_sleep_t *sleepGPIO, uint8_t state);
+drv8833_err drv8833_set_sleep_state(drv8833_handle_t *drv8833, uint8_t state);
 
 /**
  * @brief Define o duty cycle do sinal PWM do DRV8833.
@@ -90,6 +58,6 @@ drv8833_err drv8833_set_sleep_state(drv8833_sleep_t *sleepGPIO, uint8_t state);
  *      - RET_OK: Duty cycle configurado com sucesso.
  *      - RET_INVALID_ARG: Configuração de PWM inválida.
  */
-drv8833_err drv8833_set_duty_cycle(drv8833_handle_t *handle, uint32_t duty);
+drv8833_err drv8833_set_duty_cycle(drv8833_handle_t *drv8833, uint32_t duty);
 
 #endif

@@ -5,13 +5,6 @@ motor_dc_err motor_dc_init(motor_dc_handle_t *handle)
     if (!handle)
         return RET_INVALID_ARG;
 
-    // nao confiar no usuario
-    // (colcoar confirmacoes de ha algo)
-    drv8833_in_init(&(handle->m1));
-    drv8833_in_init(&(handle->m2));
-    // nao confiar no usuario
-    // (colcoar confirmacoes de ha algo)
-
     return RET_OK;
 }
 

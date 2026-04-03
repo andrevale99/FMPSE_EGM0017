@@ -9,6 +9,7 @@ void rcc_enable_clocks(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 }
 
 // =================================
@@ -27,7 +28,7 @@ void gpio_drv8833_setup_in1(void)
     GPIOA->AFR[1] |= (1 << 0);
 }
 
-void gpio_set_state_in1(uint8_t state)
+void gpio_drv8833_set_state_in1(uint8_t state)
 {
     if (state)
         GPIOA->BSRR |= (1 << 8);
@@ -47,7 +48,7 @@ void gpio_drv8833_setup_in2(void)
     GPIOA->AFR[1] |= (1 << 4);
 }
 
-void gpio_set_state_in2(uint8_t state)
+void gpio_drv8833_set_state_in2(uint8_t state)
 {
     if (state)
         GPIOA->BSRR |= (1 << 9);
@@ -63,7 +64,7 @@ void gpio_drv8833_setup_sleep(void)
     GPIOB->PUPDR = 0;
 }
 
-void gpio_set_state_sleep(uint8_t state)
+void gpio_dr8833_set_state_sleep(uint8_t state)
 {
     if (state)
         GPIOB->BSRR |= (1 << 2);
@@ -111,6 +112,10 @@ void tim1_channel2_pwm_set_duty(uint32_t duty)
 {
     TIM1->CCR2 = duty;
 }
+
+// ================================ 
+//  TIMER 3 SETUP (AMOSTRAGEM)
+// ================================
 
 void TIMER3_Setup(void)
 {
@@ -198,6 +203,23 @@ void write_rs(uint8_t state)
         GPIOB->BSRR |= (1 << 13);
     else
         GPIOB->BSRR |= (1 << 29);
+}
+
+// ===============================
+// SETUP SYSTEM
+// ===============================
+
+void setup_system(void)
+{
+    rcc_enable_clocks();
+    systick_init();
+    gpio_lcd16x2_setup();
+    gpio_drv8833_setup_in1();
+    gpio_drv8833_setup_in2();
+    gpio_drv8833_setup_sleep();
+
+    // pwm_init();
+    // TIMER3_Setup();
 }
 
 #endif
