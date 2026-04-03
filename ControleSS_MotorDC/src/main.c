@@ -11,10 +11,10 @@
 
 volatile uint32_t cnt = 0;
 
-void TIM3_IRQHandler(void)
+void TIM4_IRQHandler(void)
 {
     cnt++;
-    TIM3->SR &= ~TIM_SR_UIF;
+    TIM4->SR &= ~TIM_SR_UIF;
     // Estouro aproximadamente em 49ms
     // Limpar bit de evento
 }

@@ -9,7 +9,7 @@ void rcc_enable_clocks(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
 }
 
 // =================================
@@ -117,31 +117,31 @@ void tim1_channel2_pwm_set_duty(uint32_t duty)
 //  TIMER 3 SETUP (AMOSTRAGEM)
 // ================================
 
-void TIMER3_Setup(void)
+void TIMER4_Setup(void)
 {
     // TIMER3 de 16 bits ativado
-    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
 
     // Carrega o valor maximo da contagem
-    TIM3->ARR = 780;
+    TIM4->ARR = 780;
 
     // Ativa o prescale do contador
-    TIM3->PSC = 1023;
+    TIM4->PSC = 1023;
 
     // Carregamento imediato de ARR
-    TIM3->EGR |= TIM_EGR_UG;
+    TIM4->EGR |= TIM_EGR_UG;
 
     // Ativa a interrupcao
-    TIM3->DIER |= TIM_DIER_UIE;
+    TIM4->DIER |= TIM_DIER_UIE;
 
-    TIM3->SR = 0;
+    TIM4->SR = 0;
 
-    NVIC_EnableIRQ(TIM3_IRQn);
-    NVIC_SetPriority(TIM3_IRQn, 0);
+    NVIC_EnableIRQ(TIM4_IRQn);
+    NVIC_SetPriority(TIM4_IRQn, 0);
 
     // Ativa a interrupcao somente pelo overflow/underflow ou DMA
     // e ativa o contador
-    TIM3->CR1 |= TIM_CR1_URS | TIM_CR1_CEN;
+    TIM4->CR1 |= TIM_CR1_URS | TIM_CR1_CEN;
 }
 
 // =================================
@@ -208,6 +208,10 @@ void write_rs(uint8_t state)
 }
 
 // ===============================
+// 
+// ===============================
+
+// ===============================
 // SETUP SYSTEM
 // ===============================
 
@@ -221,7 +225,7 @@ void setup_system(void)
     gpio_drv8833_setup_sleep();
 
     pwm_init();
-    TIMER3_Setup();
+    TIMER4_Setup();
 }
 
 #endif
