@@ -10,6 +10,7 @@ void rcc_enable_clocks(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
     RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
 }
 
 // =================================
@@ -207,9 +208,36 @@ void write_rs(uint8_t state)
         GPIOB->BSRR |= (1 << 29);
 }
 
-// ===============================
-// 
-// ===============================
+// ===================================
+// CONFIGURAR ENCODER INTERFACE (TIM3)
+// ===================================
+
+void TIMER3_setup(void)
+{
+    RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+    /* PA6, PA7 → AF2 */
+    GPIOA->MODER &= ~((3 << (6 * 2)) | (3 << (7 * 2)));
+    GPIOA->MODER |= ((2 << (6 * 2)) | (2 << (7 * 2)));
+
+    GPIOA->AFR[0] |= (2 << (6 * 4)) | (2 << (7 * 4));
+
+    /* Pull-up (recomendado) */
+    GPIOA->PUPDR |= (1 << (6 * 2)) | (1 << (7 * 2));
+
+    /* Encoder mode */
+    TIM3->SMCR |= TIM_SMCR_SMS_0 | TIM_SMCR_SMS_1;
+
+    /* CH1 e CH2 como entrada */
+    TIM3->CCMR1 |= TIM_CCMR1_CC1S_0 | TIM_CCMR1_CC2S_0;
+
+    /* Contador */
+    TIM3->ARR = 0xFFFF;
+    TIM3->CNT = 0;
+
+    TIM3->CR1 |= TIM_CR1_CEN;
+}
 
 // ===============================
 // SETUP SYSTEM
@@ -226,6 +254,7 @@ void setup_system(void)
 
     pwm_init();
     TIMER4_Setup();
+    TIMER3_setup();
 }
 
 #endif
