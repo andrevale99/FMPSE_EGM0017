@@ -21,19 +21,7 @@ typedef struct
     drv8833_handle_t m2;
 } motor_dc_handle_t;
 
-/**
- * @brief Inicializa o driver de motor DC baseado no DRV8833.
- *
- * Inicializa os dois canais do driver (m1 e m2) chamando a rotina
- * de inicialização dos pinos de entrada e PWM.
- *
- * @param[in,out] handle Ponteiro para a estrutura de controle do motor DC.
- *
- * @return
- *      - RET_OK: Inicialização realizada com sucesso.
- *      - RET_INVALID_ARG: Ponteiro inválido.
- */
-motor_dc_err motor_dc_init(motor_dc_handle_t *handle);
+motor_dc_err motor_dc_on_off(motor_dc_handle_t *motor, uint8_t state);
 
 /**
  * @brief Controla o motor DC selecionando o canal e aplicando duty cycle.
