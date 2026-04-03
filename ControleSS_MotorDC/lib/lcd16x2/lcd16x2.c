@@ -26,7 +26,6 @@ lcd16x2_err lcd16x2_init_4bits(const lcd16x2_handle *handle)
 lcd16x2_err lcd16x2_send_cmd(const lcd16x2_handle *handle, uint8_t cmd)
 {
     /* --- MSB --- */
-
     handle->d4.write(0);
     handle->d5.write(0);
     handle->d6.write(0);
@@ -43,7 +42,6 @@ lcd16x2_err lcd16x2_send_cmd(const lcd16x2_handle *handle, uint8_t cmd)
     pulse_enable(handle);
 
     /* --- LSB --- */
-
     handle->d4.write(0);
     handle->d5.write(0);
     handle->d6.write(0);
@@ -66,8 +64,6 @@ lcd16x2_err lcd16x2_send_cmd(const lcd16x2_handle *handle, uint8_t cmd)
 
 lcd16x2_err lcd16x2_send_data(const lcd16x2_handle *handle, uint8_t data)
 {
-    /* RS = 1 para dado */
-    handle->rs.write(1);
 
     /* --- MSB --- */
     handle->d4.write(0);
@@ -80,19 +76,24 @@ lcd16x2_err lcd16x2_send_data(const lcd16x2_handle *handle, uint8_t data)
     handle->d6.write((data >> 6) & 0x1);
     handle->d7.write((data >> 7) & 0x1);
 
+    /* RS = 1 para dado */
+    handle->rs.write(1);
+
     pulse_enable(handle);
 
     /* --- LSB --- */
-
     handle->d4.write(0);
     handle->d5.write(0);
     handle->d6.write(0);
     handle->d7.write(0);
-    
+
     handle->d4.write((data >> 0) & 0x1);
     handle->d5.write((data >> 1) & 0x1);
     handle->d6.write((data >> 2) & 0x1);
     handle->d7.write((data >> 3) & 0x1);
+
+    /* RS = 1 para dado */
+    handle->rs.write(1);
 
     pulse_enable(handle);
 
