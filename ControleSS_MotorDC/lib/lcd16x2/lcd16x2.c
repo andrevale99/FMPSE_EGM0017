@@ -7,15 +7,35 @@ lcd16x2_err lcd16x2_init_4bits(const lcd16x2_handle *handle)
 
     handle->delay_ms(100);
 
+    handle->rs.write(0);
+
+    /* 0x3 */
+    handle->d4.write(1);
+    handle->d5.write(1);
+    handle->d6.write(0);
+    handle->d7.write(0);
     pulse_enable(handle);
-    handle->delay_ms(10);
+    handle->delay_ms(5);
+
+    /* 0x3 */
     pulse_enable(handle);
-    handle->delay_ms(10);
+    handle->delay_ms(5);
+
+    /* 0x3 */
+    pulse_enable(handle);
+    handle->delay_ms(1);
+
+    /* 0x2 → 4 bits */
+    handle->d4.write(0);
+    handle->d5.write(1);
+    handle->d6.write(0);
+    handle->d7.write(0);
+    pulse_enable(handle);
+    handle->delay_ms(1);
 
     lcd16x2_send_cmd(handle, BITS_4 | LINES_2); // interface de 4 bits 2 linhas (aqui se habilita as 2 linhas)
     // são enviados os 2 nibbles (0x2 e 0x8)
     lcd16x2_send_cmd(handle, DISPLAY_ON | BLINK_CURSOR); // mensagem aparente cursor inativo não piscando
-    lcd16x2_send_cmd(handle, SET_DDRAM | 0x00);          // inicializa cursor na primeira posição a esquerda - 1a linha
 
     lcd16x2_send_cmd(handle, RETURN_HOME);
     lcd16x2_send_cmd(handle, CLEAR_DISPLAY); // limpa todo o display
