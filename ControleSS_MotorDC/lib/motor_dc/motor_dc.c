@@ -1,5 +1,7 @@
 #include "motor_dc.h"
 
+static uint32_t maxDutyCycle = 0;
+
 motor_dc_err motor_dc_on_off(motor_dc_handle_t *motor, uint8_t state)
 {
     if (!(motor->m1.sleep.set_state) || !(motor->m2.sleep.set_state))
