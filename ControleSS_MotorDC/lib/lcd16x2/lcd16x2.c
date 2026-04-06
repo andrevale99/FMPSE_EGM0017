@@ -122,6 +122,13 @@ lcd16x2_err lcd16x2_send_data(const lcd16x2_handle *handle, uint8_t data)
     return 0;
 }
 
+void lcd16x2_write_string(const lcd16x2_handle *handle, const char *str, uint8_t size)
+{
+
+    for(uint8_t idx=0; idx<size; ++idx)
+        lcd16x2_send_data(handle, str[idx]);
+}
+
 void pulse_enable(const lcd16x2_handle *handle)
 {
     handle->delay_ms(1);
