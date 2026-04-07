@@ -10,11 +10,12 @@
 #include "lcd16x2.h"
 
 #define PULSO_HALL 11
-#define REDUCAO 33.8
+#define REDUCAO 33.8 // Ajustdar valor de acordo com o motor
 #define PULSOS_POR_VOLTA ((float)(PULSO_HALL * REDUCAO))
 
 volatile int32_t pulsos = 0;
 volatile uint8_t RPM = 0;
+volatile int16_t posicao = 0;
 char buffer[18];
 
 void write_interface(lcd16x2_handle *lcd);
@@ -54,16 +55,22 @@ int main(void)
 
     lcd16x2_init_4bits(&lcd);
 
-    motor_dc_pwm_channel(&motor, 1, 350);
+    motor_dc_pwm_channel(&motor, 1, 400);
 
     write_interface(&lcd);
+    write_data(&lcd);
+    delay_ms(1000);
+
+    motor_dc_pwm_channel(&motor, 1, 0);
+    write_data(&lcd);
+    delay_ms(1000);
 
     while (1)
     {
-        write_data(&lcd);
-        delay_ms(1000);
+        // write_data(&lcd);
+        // delay_ms(1000);
     }
-    // 52 pulsos em 50 ms *168 rpm
+
     return 0;
 }
 
@@ -76,6 +83,10 @@ void write_interface(lcd16x2_handle *lcd)
 
     lcd16x2_send_cmd(lcd, SECOND_LINE);
     size = sprintf(buffer, "RPM:");
+    lcd16x2_write_string(lcd, buffer, size);
+
+    lcd16x2_send_cmd(lcd, SECOND_LINE | 0x8);
+    size = sprintf(buffer, "Pos:");
     lcd16x2_write_string(lcd, buffer, size);
 
     lcd16x2_send_cmd(lcd, RETURN_HOME);
@@ -93,6 +104,10 @@ void write_data(lcd16x2_handle *lcd)
     size = sprintf(buffer, "%d ", RPM);
     lcd16x2_write_string(lcd, buffer, size);
 
+    lcd16x2_send_cmd(lcd, SECOND_LINE | 0xC);
+    size = sprintf(buffer, "%d ", posicao);
+    lcd16x2_write_string(lcd, buffer, size);
+
     lcd16x2_send_cmd(lcd, RETURN_HOME);
 }
 
@@ -105,7 +120,10 @@ void TIM4_IRQHandler(void)
         pulsos = (pulsos >> 2);
         TIM3->CNT = 0;
 
+        // RPM = pulsos / (PulsosEncoder * Reducao) * (60 / T(segundos))
         RPM = (uint8_t)(((float)pulsos / PULSOS_POR_VOLTA) * 60. / 0.05);
+
+        posicao += (pulsos * 360.0f) / PULSOS_POR_VOLTA;
 
         // Limpar bit de evento
         TIM4->SR &= ~TIM_SR_UIF;
