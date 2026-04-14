@@ -67,8 +67,6 @@ int main(void)
 
     while (1)
     {
-        // write_data(&lcd);
-        // delay_ms(1000);
     }
 
     return 0;
