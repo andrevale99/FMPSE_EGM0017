@@ -4,6 +4,20 @@
 #include <stm32f411xe.h>
 #include "lcd16x2.h"
 
+#define DRV8833_GPIO_SLEEP 2
+#define DRV8833_GPIO_IN_1 8
+#define DRV8833_GPIO_IN_2 9
+
+#define LCD_GPIO_D4 0
+#define LCD_GPIO_D5 1
+#define LCD_GPIO_D6 2
+#define LCD_GPIO_D7 3
+#define LCD_GPIO_EN 12
+#define LCD_GPIO_RS 13
+
+#define ENCODER_CHN_A 7
+#define ENCODER_CHN_B 6
+
 void rcc_enable_clocks(void)
 {
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -20,8 +34,8 @@ void rcc_enable_clocks(void)
 void gpio_drv8833_setup_in1(void)
 {
     // Modo alternate, Fast speed, NO pull-up/down
-    GPIOA->MODER |= (2 << 16);
-    GPIOA->OSPEEDR |= (2 << 16);
+    GPIOA->MODER |= (2 << (DRV8833_GPIO_IN_1 * 2));
+    GPIOA->OSPEEDR |= (2 << (DRV8833_GPIO_IN_1 * 2));
     GPIOA->PUPDR = 0;
 
     // Alternate function 1 (TIM1_CHANNELS)
@@ -32,16 +46,16 @@ void gpio_drv8833_setup_in1(void)
 void gpio_drv8833_set_state_in1(uint8_t state)
 {
     if (state)
-        GPIOA->BSRR |= (1 << 8);
+        GPIOA->BSRR |= (1 << (DRV8833_GPIO_IN_1 * 2));
     else
-        GPIOA->BSRR |= (1 << 24);
+        GPIOA->BSRR |= (1 << (DRV8833_GPIO_IN_1 + 16));
 }
 
 void gpio_drv8833_setup_in2(void)
 {
     // Modo alternate, Fast speed, NO pull-up/down
-    GPIOA->MODER |= (2 << 18);
-    GPIOA->OSPEEDR |= (2 << 18);
+    GPIOA->MODER |= (2 << (DRV8833_GPIO_IN_2 * 2));
+    GPIOA->OSPEEDR |= (2 << (DRV8833_GPIO_IN_2 * 2));
     GPIOA->PUPDR = 0;
 
     // Alternate function 1 (TIM1_CHANNELS)
@@ -52,25 +66,25 @@ void gpio_drv8833_setup_in2(void)
 void gpio_drv8833_set_state_in2(uint8_t state)
 {
     if (state)
-        GPIOA->BSRR |= (1 << 9);
+        GPIOA->BSRR |= (1 << (DRV8833_GPIO_IN_2));
     else
-        GPIOA->BSRR |= (1 << 25);
+        GPIOA->BSRR |= (1 << ((DRV8833_GPIO_IN_2 + 16)));
 }
 
 void gpio_drv8833_setup_sleep(void)
 {
     // OUTPUT, medium speed, no pull-up/down
-    GPIOB->MODER |= (1 << 4);
-    GPIOB->OSPEEDR |= (1 << 4);
+    GPIOB->MODER |= (1 << (DRV8833_GPIO_SLEEP * 2));
+    GPIOB->OSPEEDR |= (1 << (DRV8833_GPIO_SLEEP * 2));
     GPIOB->PUPDR = 0;
 }
 
 void gpio_dr8833_set_state_sleep(uint8_t state)
 {
     if (state)
-        GPIOB->BSRR |= (1 << 2);
+        GPIOB->BSRR |= (1 << DRV8833_GPIO_SLEEP);
     else
-        GPIOB->BSRR |= (1 << 18);
+        GPIOB->BSRR |= (1 << (DRV8833_GPIO_SLEEP + 2));
 }
 
 void pwm_init(void)
@@ -163,49 +177,49 @@ void gpio_lcd16x2_setup(void)
 void write_d4(uint8_t state)
 {
     if (state)
-        GPIOA->BSRR |= (1 << 0);
+        GPIOA->BSRR |= (1 << LCD_GPIO_D4);
     else
-        GPIOA->BSRR |= (1 << (0 + 16));
+        GPIOA->BSRR |= (1 << (LCD_GPIO_D4 + 16));
 }
 
 void write_d5(uint8_t state)
 {
     if (state)
-        GPIOA->BSRR |= (1 << 1);
+        GPIOA->BSRR |= (1 << LCD_GPIO_D5);
     else
-        GPIOA->BSRR |= (1 << (1 + 16));
+        GPIOA->BSRR |= (1 << (LCD_GPIO_D5 + 16));
 }
 
 void write_d6(uint8_t state)
 {
     if (state)
-        GPIOA->BSRR |= (1 << 2);
+        GPIOA->BSRR |= (1 << LCD_GPIO_D6);
     else
-        GPIOA->BSRR |= (1 << (2 + 16));
+        GPIOA->BSRR |= (1 << (LCD_GPIO_D6 + 16));
 }
 
 void write_d7(uint8_t state)
 {
     if (state)
-        GPIOA->BSRR |= (1 << 3);
+        GPIOA->BSRR |= (1 << LCD_GPIO_D7);
     else
-        GPIOA->BSRR |= (1 << (3 + 16));
+        GPIOA->BSRR |= (1 << (LCD_GPIO_D7 + 16));
 }
 
 void write_en(uint8_t state)
 {
     if (state)
-        GPIOB->BSRR |= (1 << 12); // EN = 1
+        GPIOB->BSRR |= (1 << LCD_GPIO_EN); // EN = 1
     else
-        GPIOB->BSRR |= (1 << 28); // EN = 0
+        GPIOB->BSRR |= (1 << (LCD_GPIO_EN + 16)); // EN = 0
 }
 
 void write_rs(uint8_t state)
 {
     if (state)
-        GPIOB->BSRR |= (1 << 13);
+        GPIOB->BSRR |= (1 << LCD_GPIO_RS);
     else
-        GPIOB->BSRR |= (1 << 29);
+        GPIOB->BSRR |= (1 << (LCD_GPIO_EN + 16));
 }
 
 // ===================================
@@ -218,13 +232,13 @@ void TIMER3_setup(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 
     /* PA6, PA7 → AF2 */
-    GPIOA->MODER &= ~((3 << (6 * 2)) | (3 << (7 * 2)));
-    GPIOA->MODER |= ((2 << (6 * 2)) | (2 << (7 * 2)));
+    GPIOA->MODER &= ~((3 << (ENCODER_CHN_B * 2)) | (3 << (ENCODER_CHN_A * 2)));
+    GPIOA->MODER |= ((2 << (ENCODER_CHN_B * 2)) | (2 << (ENCODER_CHN_A * 2)));
 
-    GPIOA->AFR[0] |= (2 << (6 * 4)) | (2 << (7 * 4));
+    GPIOA->AFR[0] |= (2 << (ENCODER_CHN_B * 4)) | (2 << (ENCODER_CHN_A * 4));
 
     /* Pull-up (recomendado) */
-    GPIOA->PUPDR |= (1 << (6 * 2)) | (1 << (7 * 2));
+    GPIOA->PUPDR |= (1 << (ENCODER_CHN_B * 2)) | (1 << (ENCODER_CHN_A * 2));
 
     /* Encoder mode */
     TIM3->SMCR |= TIM_SMCR_SMS_0 | TIM_SMCR_SMS_1;
