@@ -1,0 +1,12 @@
+#ifndef DEFS_H
+#define DEFS_H
+
+#define ENCODER_MAX_LIMIT (1<<12)
+#define ENCODER_LOW_LIMIT -(1<<12)
+
+#define ENCODER_CHN_A_GPIO 13
+#define ENCODER_CHN_B_GPIO -1
+
+#define TIMER_RESOLUTION_HZ 1000000
+
+#endif
