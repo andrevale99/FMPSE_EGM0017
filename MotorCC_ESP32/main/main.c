@@ -76,6 +76,9 @@ void app_main(void)
 
         .M2Channel = MOTOR_DC_M2_CHANNEL,
         .M2GPIO = MOTOR_DC_M2_GPIO,
+
+        .pulsos_por_voltas = 11,
+        .reducao = 33.8,
     };
 
     motor_dc_init(&motor);
@@ -111,14 +114,13 @@ void app_main(void)
             ESP_LOGI(TAG, "Pulsos: %i", Atualpulsos);
             flagPrint = false;
         }
-        
+
         motor_dc_set_duty(&motor, motor.M1GPIO, 256);
         vTaskDelay(pdMS_TO_TICKS(1000));
         motor_dc_set_duty(&motor, motor.M1GPIO, 512);
         vTaskDelay(pdMS_TO_TICKS(1000));
         motor_dc_set_duty(&motor, motor.M1GPIO, 1023);
         vTaskDelay(pdMS_TO_TICKS(1000));
-
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
