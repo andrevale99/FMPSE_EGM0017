@@ -12,7 +12,7 @@
   "clangd.arguments": [
     "--background-index",
     "--query-driver=**",
-    "--compile-commands-dir=/home/andre/Documents/Git/FMPSE_EGM0017/ControleSS_MotorDC/MotorCC_ESP32/build"
+    "--compile-commands-dir=/home/andre/Documents/Git/FMPSE_EGM0017/MotorCC_ESP32/build"
   ],
   "idf.flashType": "UART"
 }
