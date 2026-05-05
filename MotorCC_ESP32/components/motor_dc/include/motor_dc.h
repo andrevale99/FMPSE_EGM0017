@@ -6,6 +6,13 @@
 #include "esp_err.h"
 #include "esp_log.h"
 
+typedef enum {
+    MOTOR_DIR_FORWARD,
+    MOTOR_DIR_BACKWARD,
+    MOTOR_DIR_BRAKE,
+    MOTOR_DIR_COAST
+} motor_dir_t;
+
 typedef struct
 {
     ledc_timer_config_t PwmTimer;
@@ -15,6 +22,9 @@ typedef struct
 
     int M1GPIO;
     int M2GPIO;
+
+    int pulsos_por_voltas;
+    float reducao;
 } motor_dc_t;
 
 esp_err_t motor_dc_init(motor_dc_t *motor);

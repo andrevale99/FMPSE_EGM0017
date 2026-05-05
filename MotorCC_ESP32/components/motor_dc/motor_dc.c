@@ -24,6 +24,14 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
         return xErrCheck;
     }
 
+    if(motor->M1Channel == motor->M2Channel)
+    {
+        ESP_LOGE(TAG, "Mesmo canal PWM para M1 (chn: %d) e M2 (chn: %d)",
+        motor->M1Channel, motor->M2Channel);
+
+        return ESP_ERR_INVALID_ARG;
+    }
+    
     ledc_channel_config_t configM1 = {
         .channel = motor->M1Channel,
         .timer_sel = motor->PwmTimer.timer_num,
