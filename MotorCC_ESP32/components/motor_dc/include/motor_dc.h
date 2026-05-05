@@ -9,8 +9,9 @@
 typedef enum {
     MOTOR_DIR_FORWARD,
     MOTOR_DIR_BACKWARD,
+    MOTOR_DIR_DECAY_FORWARD,
+    MOTOR_DIR_DECAY_BACKWARD,
     MOTOR_DIR_BRAKE,
-    MOTOR_DIR_COAST
 } motor_dir_t;
 
 typedef struct
