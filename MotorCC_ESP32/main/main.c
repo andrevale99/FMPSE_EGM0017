@@ -9,6 +9,7 @@
 #include "esp_err.h"
 
 #include "encoder.h"
+#include "motor_dc.h"
 
 #include "defs.h"
 
@@ -60,7 +61,25 @@ void app_main(void)
         };
 
     encoder_init(&EncoderConfig);
-    
+
+    motor_dc_t motor = {
+        .PwmTimer = {
+            .clk_cfg = MOTOR_DC_CLOCK_SOURCE,
+            .speed_mode = MOTOR_DC_SPEED,
+            .timer_num = MOTOR_DC_PWM_TIMER,
+            .freq_hz = MOTOR_DC_FREQ,
+            .duty_resolution = MOTOR_DC_RESOLUTION_PWM,
+        },
+
+        .M1Channel = MOTOR_DC_M1_CHANNEL,
+        .M1GPIO = MOTOR_DC_M1_GPIO,
+
+        .M2Channel = MOTOR_DC_M2_CHANNEL,
+        .M2GPIO = MOTOR_DC_M2_GPIO,
+    };
+
+    motor_dc_init(&motor);
+
     gptimer_config_t config =
         {
             .clk_src = GPTIMER_CLK_SRC_DEFAULT,
@@ -77,7 +96,7 @@ void app_main(void)
 
     gptimer_alarm_config_t alarm_config = {
         .reload_count = 0,
-        .alarm_count = 1000000,
+        .alarm_count = 50000,
         .flags.auto_reload_on_alarm = true,
     };
     ESP_ERROR_CHECK(gptimer_set_alarm_action(handleTimer, &alarm_config));
@@ -92,6 +111,14 @@ void app_main(void)
             ESP_LOGI(TAG, "Pulsos: %i", Atualpulsos);
             flagPrint = false;
         }
+        
+        motor_dc_set_duty(&motor, motor.M1GPIO, 256);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        motor_dc_set_duty(&motor, motor.M1GPIO, 512);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        motor_dc_set_duty(&motor, motor.M1GPIO, 1023);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
