@@ -1,6 +1,6 @@
 #include "motor_dc.h"
 
-#define DELAY_DECAY_BRAKE 100
+#define DELAY_DECAY_ACCELERATE 100
 #define STEP_DELAY_DECAY 10
 
 static const char *TAG = "MOTOR_DC";
@@ -153,6 +153,9 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
     esp_err_t xErrCheck = ESP_OK;
 
     int step = 0;
+    uint32_t current_duty = 0;
+    uint32_t delta = 0;
+    uint32_t newDuty = 0;
 
     switch (move)
     {
@@ -174,7 +177,7 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
         {
             duty = step * (i - 1);
             motor_dc_set_duty(motor, motor->M1GPIO, duty);
-            vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_BRAKE));
+            vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_ACCELERATE));
         }
         break;
 
@@ -184,8 +187,48 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
         {
             duty = step * (i - 1);
             motor_dc_set_duty(motor, motor->M2GPIO, duty);
-            vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_BRAKE));
+            vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_ACCELERATE));
         }
+        break;
+
+    case MOTOR_DIR_ACCELERATE_FORWARD:
+        current_duty = motor_dc_get_duty(motor->M1GPIO, motor);
+
+        if (duty > current_duty)
+        {
+            delta = duty - current_duty;
+
+            for (int i = 1; i <= STEP_DELAY_DECAY; i++)
+            {
+                newDuty = current_duty +
+                          (delta * i * i) / (STEP_DELAY_DECAY * STEP_DELAY_DECAY); // rampa suave (quadrática)
+
+                motor_dc_set_duty(motor, motor->M1GPIO, newDuty);
+                vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_ACCELERATE));
+            }
+        }
+        else
+            ESP_LOGW(TAG, "Duty inferior ao atual, utilizar MOTOR_DIR_DECAY_x");
+        break;
+
+    case MOTOR_DIR_ACCELERATE_BACKWARD:
+        current_duty = motor_dc_get_duty(motor->M2GPIO, motor);
+
+        if (duty > current_duty)
+        {
+            delta = duty - current_duty;
+
+            for (int i = 1; i <= STEP_DELAY_DECAY; i++)
+            {
+                newDuty = current_duty +
+                          (delta * i * i) / (STEP_DELAY_DECAY * STEP_DELAY_DECAY); // rampa suave (quadrática)
+
+                motor_dc_set_duty(motor, motor->M2GPIO, newDuty);
+                vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_ACCELERATE));
+            }
+        }
+        else
+            ESP_LOGW(TAG, "Duty inferior ao atual, utilizar MOTOR_DIR_DECAY_x");
         break;
 
     default:
