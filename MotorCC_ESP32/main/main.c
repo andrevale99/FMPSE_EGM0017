@@ -73,11 +73,11 @@ void app_main(void)
             .encoder = encoder,
         };
 
-    // timer_isr_init(&dataArgs);
+    timer_isr_init(&dataArgs);
 
-    motor_dc_set_movement(&motor, MOTOR_DIR_FORWARD, 1023);
     while (1)
     {
+        motor_dc_set_movement(&motor, MOTOR_DIR_FORWARD, 1023);
         motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_FORWARD, 1023);
 
         vTaskDelay(pdMS_TO_TICKS(1000));
