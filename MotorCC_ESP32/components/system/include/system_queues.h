@@ -7,5 +7,10 @@
 
 QueueHandle_t queue_isr_motor_task = NULL;
 
+void system_queue_init(void)
+{
+    
+}
+
 
 #endif
