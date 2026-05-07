@@ -1,9 +1,11 @@
 #ifndef TIMER_ISR_H
 #define TIMER_ISR_H
 
-#include "defs.h"
+#include "driver/gptimer.h"
 
-gptimer_handle_t handleTimer = NULL;
+#include "env.h"
+
+static gptimer_handle_t handleTimer = NULL;
 
 typedef struct
 {
