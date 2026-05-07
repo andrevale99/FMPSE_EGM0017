@@ -1,6 +1,8 @@
 #ifndef MOTOR_DC
 #define MOTOR_DC
 
+#include "freertos/FreeRTOS.h"
+
 #include "driver/ledc.h"
 
 #include "esp_err.h"
@@ -29,6 +31,8 @@ typedef struct
 } motor_dc_t;
 
 esp_err_t motor_dc_init(motor_dc_t *motor);
+
+esp_err_t motor_dc_deinit(motor_dc_t *motor);
 
 esp_err_t motor_dc_set_duty(motor_dc_t *motor, int gpio, uint32_t duty);
 

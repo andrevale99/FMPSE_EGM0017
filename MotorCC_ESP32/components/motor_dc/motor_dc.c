@@ -1,5 +1,8 @@
 #include "motor_dc.h"
 
+#define DELAY_DECAY_BRAKE 100
+#define STEP_DELAY_DECAY 10
+
 static const char *TAG = "MOTOR_DC";
 
 esp_err_t motor_dc_init(motor_dc_t *motor)
@@ -75,6 +78,30 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
     return ESP_OK;
 }
 
+esp_err_t motor_dc_deinit(motor_dc_t *motor)
+{
+    if (!motor)
+    {
+        ESP_LOGE(TAG, "Estrutura motor_dc_t nula");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    ESP_LOGI(TAG, "Finalizando motor_dc...");
+
+    ledc_set_duty(motor->PwmTimer.speed_mode, motor->M1Channel, 0);
+    ledc_update_duty(motor->PwmTimer.speed_mode, motor->M1Channel);
+
+    ledc_set_duty(motor->PwmTimer.speed_mode, motor->M2Channel, 0);
+    ledc_update_duty(motor->PwmTimer.speed_mode, motor->M2Channel);
+
+    ledc_stop(motor->PwmTimer.speed_mode, motor->M1Channel, 0);
+    ledc_stop(motor->PwmTimer.speed_mode, motor->M2Channel, 0);
+
+    ESP_LOGI(TAG, "motor_dc finalizado com sucesso");
+
+    return ESP_OK;
+}
+
 esp_err_t motor_dc_set_duty(motor_dc_t *motor, int gpio, uint32_t duty)
 {
     if (duty > (1 << motor->PwmTimer.duty_resolution))
@@ -125,6 +152,8 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
 {
     esp_err_t xErrCheck = ESP_OK;
 
+    int step = 0;
+
     switch (move)
     {
     case MOTOR_DIR_FORWARD:
@@ -139,14 +168,25 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
         motor_dc_set_duty(motor, motor->M1GPIO, 0);
         break;
 
-        /*
-        Realizar verificacao se ha drv8833
-        */
-        /*case MOTOR_DIR_DECAY_FORWARD:
-            break;
+    case MOTOR_DIR_DECAY_FORWARD:
+        step = motor_dc_get_duty(motor->M1GPIO, motor) / STEP_DELAY_DECAY;
+        for (int i = STEP_DELAY_DECAY; i > 0; i--)
+        {
+            duty = step * (i - 1);
+            motor_dc_set_duty(motor, motor->M1GPIO, duty);
+            vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_BRAKE));
+        }
+        break;
 
-        case MOTOR_DIR_DECAY_BACKWARD:
-            break;*/
+    case MOTOR_DIR_DECAY_BACKWARD:
+        step = motor_dc_get_duty(motor->M2GPIO, motor) / STEP_DELAY_DECAY;
+        for (int i = STEP_DELAY_DECAY; i > 0; i--)
+        {
+            duty = step * (i - 1);
+            motor_dc_set_duty(motor, motor->M2GPIO, duty);
+            vTaskDelay(pdMS_TO_TICKS(DELAY_DECAY_BRAKE));
+        }
+        break;
 
     default:
         ESP_LOGE(TAG, "Movimento acao nao reconhecido");
