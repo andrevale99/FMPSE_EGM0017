@@ -77,9 +77,14 @@ void app_main(void)
 
     while (1)
     {
-        motor_dc_set_movement(&motor, MOTOR_DIR_FORWARD, 1023);
+        motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_FORWARD, 1023);
+        vTaskDelay(pdMS_TO_TICKS(1000));
         motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_FORWARD, 1023);
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
+        motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_BACKWARD, 1023);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_BACKWARD, 1023);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
