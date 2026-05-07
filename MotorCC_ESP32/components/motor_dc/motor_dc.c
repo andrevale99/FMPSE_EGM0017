@@ -215,7 +215,10 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
             }
         }
         else
+        {
             ESP_LOGW(TAG, "Duty inferior ao atual, utilizar MOTOR_DIR_DECAY_x");
+            xErrCheck = ESP_ERR_INVALID_ARG;
+        }
         break;
 
     case MOTOR_DIR_ACCELERATE_BACKWARD:
@@ -235,7 +238,10 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
             }
         }
         else
+        {
             ESP_LOGW(TAG, "Duty inferior ao atual, utilizar MOTOR_DIR_DECAY_x");
+            xErrCheck = ESP_ERR_INVALID_ARG;
+        }
         break;
 
     default:
