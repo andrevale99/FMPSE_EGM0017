@@ -3,15 +3,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "driver/gptimer.h"
-
 #include "esp_log.h"
 #include "esp_err.h"
 
 #include "encoder.h"
-#include "motor_dc.h"
 
-#include "defs.h"
+#include "env.h"
+#include "system.h"
 #include "timerISR.h"
 
 const char *TAG = "MAIN";
@@ -47,27 +45,6 @@ void app_main(void)
 
     encoder_init(&encoder);
 
-    motor_dc_t motor = {
-        .PwmTimer = {
-            .clk_cfg = MOTOR_DC_CLOCK_SOURCE,
-            .speed_mode = MOTOR_DC_SPEED,
-            .timer_num = MOTOR_DC_PWM_TIMER,
-            .freq_hz = MOTOR_DC_FREQ,
-            .duty_resolution = MOTOR_DC_RESOLUTION_PWM,
-        },
-
-        .M1Channel = MOTOR_DC_M1_CHANNEL,
-        .M1GPIO = MOTOR_DC_M1_GPIO,
-
-        .M2Channel = MOTOR_DC_M2_CHANNEL,
-        .M2GPIO = MOTOR_DC_M2_GPIO,
-
-        .pulsos_por_voltas = 11,
-        .reducao = 33.8,
-    };
-
-    motor_dc_init(&motor);
-
     timer_isr_user_data_t dataArgs =
         {
             .encoder = encoder,
@@ -75,16 +52,10 @@ void app_main(void)
 
     timer_isr_init(&dataArgs);
 
-    while (1)
-    {
-        motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_FORWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_FORWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+    system_init();
 
-        motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_BACKWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_BACKWARD, 1023);
+    while(1)
+    {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
