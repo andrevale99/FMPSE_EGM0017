@@ -39,24 +39,40 @@ static void vTaskMotor(void *pvArgs)
         ESP_LOGE(TAG, "Erro ao iniciar o componente od motor");
     }
 
+    uint32_t valorRecebido;
+
     while (1)
     {
-        motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_FORWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_FORWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        xTaskNotifyWait(
+            0x00,
+            0xFFFFFFFF,
+            &valorRecebido,
+            portMAX_DELAY);
+        
+        ESP_LOGI(TAG, "Pulsos: %d", valorRecebido);
 
-        motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_BACKWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_BACKWARD, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        // motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_FORWARD, 1023);
+        // vTaskDelay(pdMS_TO_TICKS(1000));
+        // motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_FORWARD, 1023);
+        // vTaskDelay(pdMS_TO_TICKS(1000));
+
+        // motor_dc_set_movement(&motor, MOTOR_DIR_ACCELERATE_BACKWARD, 1023);
+        // vTaskDelay(pdMS_TO_TICKS(1000));
+        // motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_BACKWARD, 1023);
+        // vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
 void motor_task_init(void)
 {
-    xTaskCreatePinnedToCore(vTaskMotor, "taskMotor", STACK_SIZE_TASK_MOTOR, NULL, 
-        1, &handleTaskMotor, CPU_0);
+    xTaskCreatePinnedToCore(vTaskMotor, "taskMotor", STACK_SIZE_TASK_MOTOR, NULL,
+                            1, &handleTaskMotor, CPU_0);
+}
+
+/* Getter para ISR */
+TaskHandle_t motor_task_get_handle(void)
+{
+    return handleTaskMotor;
 }
 
 #endif
