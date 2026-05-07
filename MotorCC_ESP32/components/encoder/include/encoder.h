@@ -31,11 +31,14 @@ typedef struct
     pcnt_channel_edge_action_t NegEdgeActionB;
     pcnt_channel_level_action_t HighLevelActionB;
     pcnt_channel_level_action_t LowLevelActionB;
-} encoder_config_t;
+} encoder_t;
 
-esp_err_t encoder_init(encoder_config_t *config);
-esp_err_t encoder_deinit(encoder_config_t *config);
+esp_err_t encoder_init(encoder_t *config);
 
-uint8_t encoder_canais_ativos(encoder_config_t *encoder);
+esp_err_t encoder_deinit(encoder_t *config);
+
+uint8_t encoder_canais_ativos(encoder_t *encoder);
+
+int encoder_get_pulses(encoder_t *encoder);
 
 #endif

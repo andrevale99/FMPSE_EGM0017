@@ -2,7 +2,7 @@
 
 static const char *TAG = "ENCODER";
 
-esp_err_t encoder_init(encoder_config_t *config)
+esp_err_t encoder_init(encoder_t *config)
 {
 
     /*Variavel de verificacao de erro*/
@@ -192,7 +192,7 @@ esp_err_t encoder_init(encoder_config_t *config)
     return ESP_OK;
 }
 
-esp_err_t encoder_deinit(encoder_config_t *config)
+esp_err_t encoder_deinit(encoder_t *config)
 {
     if (!config || !config->handlePulseCounter)
         return ESP_ERR_INVALID_ARG;
@@ -218,7 +218,7 @@ esp_err_t encoder_deinit(encoder_config_t *config)
     return ESP_OK;
 }
 
-uint8_t encoder_canais_ativos(encoder_config_t *encoder)
+uint8_t encoder_canais_ativos(encoder_t *encoder)
 {
     uint8_t ui8CanaisAtivos = 0;
 
@@ -229,4 +229,23 @@ uint8_t encoder_canais_ativos(encoder_config_t *encoder)
         ui8CanaisAtivos++;
 
     return ui8CanaisAtivos;
+}
+
+int encoder_get_pulses(encoder_t *encoder)
+{
+    int data = 0;
+
+    esp_err_t xErrCheck = ESP_FAIL;
+
+    xErrCheck = pcnt_unit_get_count(encoder->handlePulseCounter, &data);
+    if (xErrCheck != ESP_OK)
+    {
+        ESP_LOGW(TAG, "Erro ao ler o contador");
+        return -1;
+    }
+
+    pcnt_unit_clear_count(encoder->handlePulseCounter);
+
+    return data;
+    
 }
