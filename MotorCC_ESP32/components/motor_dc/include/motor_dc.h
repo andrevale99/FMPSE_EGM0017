@@ -34,4 +34,7 @@ esp_err_t motor_dc_set_duty(motor_dc_t *motor, int gpio, uint32_t duty);
 
 int motor_dc_get_duty(int gpio, motor_dc_t *motor);
 
+esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t duty);
+
+
 #endif

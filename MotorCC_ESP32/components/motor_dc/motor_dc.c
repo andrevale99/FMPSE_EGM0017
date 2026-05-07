@@ -24,14 +24,14 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
         return xErrCheck;
     }
 
-    if(motor->M1Channel == motor->M2Channel)
+    if (motor->M1Channel == motor->M2Channel)
     {
         ESP_LOGE(TAG, "Mesmo canal PWM para M1 (chn: %d) e M2 (chn: %d)",
-        motor->M1Channel, motor->M2Channel);
+                 motor->M1Channel, motor->M2Channel);
 
         return ESP_ERR_INVALID_ARG;
     }
-    
+
     ledc_channel_config_t configM1 = {
         .channel = motor->M1Channel,
         .timer_sel = motor->PwmTimer.timer_num,
@@ -119,4 +119,40 @@ int motor_dc_get_duty(int gpio, motor_dc_t *motor)
         ESP_LOGE(TAG, "Nenhum Canal/GPIO foi configurado");
         return -1;
     }
+}
+
+esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t duty)
+{
+    esp_err_t xErrCheck = ESP_OK;
+
+    switch (move)
+    {
+    case MOTOR_DIR_FORWARD:
+        motor_dc_set_duty(motor, motor->M1GPIO, duty);
+        break;
+
+    case MOTOR_DIR_BACKWARD:
+        motor_dc_set_duty(motor, motor->M2GPIO, duty);
+        break;
+
+    case MOTOR_DIR_BRAKE:
+        motor_dc_set_duty(motor, motor->M1GPIO, 0);
+        break;
+
+        /*
+        Realizar verificacao se ha drv8833
+        */
+        /*case MOTOR_DIR_DECAY_FORWARD:
+            break;
+
+        case MOTOR_DIR_DECAY_BACKWARD:
+            break;*/
+
+    default:
+        ESP_LOGE(TAG, "Movimento acao nao reconhecido");
+        xErrCheck = ESP_ERR_INVALID_ARG;
+        break;
+    }
+
+    return xErrCheck;
 }
