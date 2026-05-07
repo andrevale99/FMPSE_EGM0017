@@ -234,7 +234,7 @@ uint8_t encoder_canais_ativos(encoder_t *encoder)
 int encoder_get_pulses(encoder_t *encoder)
 {
     int data = 0;
-
+    
     esp_err_t xErrCheck = ESP_FAIL;
 
     xErrCheck = pcnt_unit_get_count(encoder->handlePulseCounter, &data);
