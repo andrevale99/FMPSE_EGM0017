@@ -12,35 +12,20 @@
 #include "motor_dc.h"
 
 #include "defs.h"
+#include "timerISR.h"
 
 const char *TAG = "MAIN";
 
-volatile int Atualpulsos = 0;
-volatile int Anteriorpulsos = 0;
+int Atualpulsos = 0;
 volatile uint8_t flagPrint = false;
 
-gptimer_handle_t handleTimer = NULL;
-
-static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_data)
-{
-    BaseType_t high_task_awoken = pdTRUE;
-
-    encoder_config_t *encoder = (encoder_config_t *)user_data;
-
-    pcnt_unit_get_count(encoder->handlePulseCounter, &Atualpulsos);
-
-    flagPrint = true;
-
-    pcnt_unit_clear_count(encoder->handlePulseCounter);
-
-    return high_task_awoken;
-}
+pcnt_unit_handle_t pcnt_unit = NULL;
 
 void app_main(void)
 {
-    encoder_config_t EncoderConfig =
+    encoder_t encoder =
         {
-            // .handlePulseCounter = pcnt_unit,
+            .handlePulseCounter = pcnt_unit,
 
             .pcnt_chan_a = NULL,
             .pcnt_chan_b = NULL,
@@ -60,7 +45,7 @@ void app_main(void)
             .u32GlitchFilter = 1000,
         };
 
-    encoder_init(&EncoderConfig);
+    encoder_init(&encoder);
 
     motor_dc_t motor = {
         .PwmTimer = {
@@ -83,45 +68,18 @@ void app_main(void)
 
     motor_dc_init(&motor);
 
-    gptimer_config_t config =
+    timer_isr_user_data_t dataArgs =
         {
-            .clk_src = GPTIMER_CLK_SRC_DEFAULT,
-            .direction = GPTIMER_COUNT_UP,
-            .resolution_hz = TIMER_RESOLUTION_HZ, // 1 MHz = 1 us
+            .encoder = encoder,
         };
 
-    ESP_ERROR_CHECK(gptimer_new_timer(&config, &handleTimer));
+    // timer_isr_init(&dataArgs);
 
-    gptimer_event_callbacks_t cbs = {
-        .on_alarm = timer_alarm_callback,
-    };
-    ESP_ERROR_CHECK(gptimer_register_event_callbacks(handleTimer, &cbs, &EncoderConfig));
-
-    gptimer_alarm_config_t alarm_config = {
-        .reload_count = 0,
-        .alarm_count = 50000,
-        .flags.auto_reload_on_alarm = true,
-    };
-    ESP_ERROR_CHECK(gptimer_set_alarm_action(handleTimer, &alarm_config));
-
-    gptimer_enable(handleTimer);
-    gptimer_start(handleTimer);
-
+    motor_dc_set_movement(&motor, MOTOR_DIR_FORWARD, 1023);
     while (1)
     {
-        if (flagPrint)
-        {
-            ESP_LOGI(TAG, "Pulsos: %i", Atualpulsos);
-            flagPrint = false;
-        }
+        motor_dc_set_movement(&motor, MOTOR_DIR_DECAY_FORWARD, 1023);
 
-        motor_dc_set_duty(&motor, motor.M1GPIO, 256);
         vTaskDelay(pdMS_TO_TICKS(1000));
-        motor_dc_set_duty(&motor, motor.M1GPIO, 512);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        motor_dc_set_duty(&motor, motor.M1GPIO, 1023);
-        vTaskDelay(pdMS_TO_TICKS(1000));
-
-        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
