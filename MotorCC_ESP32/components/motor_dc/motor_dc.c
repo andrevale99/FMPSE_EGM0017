@@ -24,6 +24,7 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
     {
         ESP_LOGE(TAG, "Erro ao configurar o TIMER %d, verificar estutura PwmTimer",
                  motor->PwmTimer);
+        motor_dc_deinit(motor);
         return xErrCheck;
     }
 
@@ -31,6 +32,8 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
     {
         ESP_LOGE(TAG, "Mesmo canal PWM para M1 (chn: %d) e M2 (chn: %d)",
                  motor->M1Channel, motor->M2Channel);
+
+        motor_dc_deinit(motor);
 
         return ESP_ERR_INVALID_ARG;
     }
@@ -50,6 +53,8 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
     {
         ESP_LOGE(TAG, "Erro ao instalar o canal do PWM no GPIo %d",
                  motor->M1GPIO);
+
+        motor_dc_deinit(motor);
         return xErrCheck;
     }
     ESP_LOGI(TAG, "Canal M1 configurado");
@@ -69,6 +74,8 @@ esp_err_t motor_dc_init(motor_dc_t *motor)
     {
         ESP_LOGE(TAG, "Erro ao instalar o canal do PWM no GPIo %d",
                  motor->M2GPIO);
+
+        motor_dc_deinit(motor);
         return xErrCheck;
     }
     ESP_LOGI(TAG, "Canal M2 configurado");
