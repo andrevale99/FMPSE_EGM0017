@@ -8,7 +8,8 @@
 #include "esp_err.h"
 #include "esp_log.h"
 
-typedef enum {
+typedef enum
+{
     MOTOR_DIR_FORWARD,
     MOTOR_DIR_BACKWARD,
     MOTOR_DIR_DECAY_FORWARD,
@@ -42,5 +43,6 @@ int motor_dc_get_duty(int gpio, motor_dc_t *motor);
 
 esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t duty);
 
+float motor_dc_get_rpm(motor_dc_t *motor, int pulsos, float amostragem_ms);
 
 #endif

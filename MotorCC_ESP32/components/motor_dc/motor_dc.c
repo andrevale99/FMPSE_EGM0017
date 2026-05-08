@@ -252,3 +252,8 @@ esp_err_t motor_dc_set_movement(motor_dc_t *motor, motor_dir_t move, uint32_t du
 
     return xErrCheck;
 }
+
+float motor_dc_get_rpm(motor_dc_t *motor, int pulsos, float amostragem_ms)
+{
+    return (pulsos / (motor->reducao * motor->pulsos_por_voltas) * 60 / amostragem_ms);
+}
