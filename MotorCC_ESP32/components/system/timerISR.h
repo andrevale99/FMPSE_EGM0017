@@ -8,7 +8,8 @@
 
 #include "env.h"
 
-static gptimer_handle_t handleTimer = NULL;
+#include "motor_dc.h"
+#include "encoder.h"
 
 typedef struct
 {
@@ -16,15 +17,22 @@ typedef struct
     TaskHandle_t handletaskMotor;
 } timer_isr_user_data_t;
 
+static gptimer_handle_t handleTimer = NULL;
+
+static timer_isr_user_data_t StaticData;
+
 static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_data)
 {
     BaseType_t high_task_awoken = pdTRUE;
 
     timer_isr_user_data_t *data = (timer_isr_user_data_t *)user_data;
 
+    // No sistema esta quadratura X4, logo, conta o dobro de pulsos
+    int pulsos = (encoder_get_pulses(data->encoder)>>1);
+
     xTaskNotifyFromISR(
         data->handletaskMotor,
-        encoder_get_pulses(data->encoder),
+        pulsos,
         eSetValueWithOverwrite,
         &high_task_awoken);
 
@@ -35,6 +43,8 @@ static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer
 
 void timer_isr_init(timer_isr_user_data_t *userdata)
 {
+    memcpy(&StaticData, userdata, sizeof(timer_isr_user_data_t));
+    
     gptimer_config_t config =
         {
             .clk_src = GPTIMER_CLK_SRC_DEFAULT,
@@ -47,7 +57,7 @@ void timer_isr_init(timer_isr_user_data_t *userdata)
     gptimer_event_callbacks_t cbs = {
         .on_alarm = timer_alarm_callback,
     };
-    ESP_ERROR_CHECK(gptimer_register_event_callbacks(handleTimer, &cbs, userdata));
+    ESP_ERROR_CHECK(gptimer_register_event_callbacks(handleTimer, &cbs, &StaticData));
 
     gptimer_alarm_config_t alarm_config = {
         .reload_count = 0,
